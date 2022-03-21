@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title></title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+	<style type="text/css">
+		table, tr, th, td{
+			border:1px solid;
+			border-collapse: collapse;
+		}
+
+		th{
+			background-color: grey;
+			color: white;
+		}
+	</style>
+</head>
+<body>
+	<h3 align="center">Top 10 cryptocurrencies with the most circulating supply</h3>
+	<table style="width:100%" align="center">
+		<thead>
+			<tr>
+				<th>Symbol</th>
+				<th>Price (USD)</th>
+				<th>Circulating Supply</th>
+			</tr>	
+		</thead>
+		<tbody>
+			
+		</tbody>
+
+	</table>
+	<script type="text/javascript">
+		$.ajax({
+			url: 'https://api.coingecko.com/api/v3/coins/markets',
+			type: 'GET',
+			data: { 
+					vs_currency : "usd",
+					order : "market_cap_desc",
+					per_page : 50,
+					page : 1,
+					sparkline : false
+				},
+			async: false
+		})
+		.done(function(data) {
+
+			$.ajax({
+				url: 'http://localhost/testWebcure/api/truncate.php',
+				type: 'POST',
+				async: false
+			});			
+
+
+			for (let i = 0; i < data.length; i++) {
+			  //console.log(data[i].symbol + "," + data[i].current_price + "," + data[i].circulating_supply);
+				$.ajax({
+					url: 'http://localhost/testWebcure/api/insert.php',
+					type: 'POST',
+					data: {
+							symbol: data[i].symbol,
+							current_price: data[i].current_price,
+							circulating_supply: data[i].circulating_supply,
+						  },
+				});
+			}
+		})
+		.fail(function(data) {
+			console.log(data);
+		});
+		
+	</script>
+
+	<script type="text/javascript">
+		$.ajax({
+			url: 'http://localhost/testWebcure/api/viewTop10.php',
+			type: 'GET',
+		})
+		.done(function(data) {
+			
+			data = JSON.parse(data);
+			for (let i = 0; i < data.length; i++) {
+				//console.log(data[i]);
+				rows = "<tr><td>" + data[i].symbol + "</td><td>" + data[i].current_price + "</td><td>" + data[i].circulating_supply + "</td></tr>";
+                tableBody = $("table tbody");
+                tableBody.append(rows);
+			}
+		})
+		.fail(function() {
+			console.log("error");
+		});
+		
+	</script>
+</body>
+</html>
